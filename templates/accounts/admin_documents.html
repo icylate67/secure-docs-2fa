@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Документы пользователей{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Документы пользователей</h1>
+    <p class="page-subtitle">Просмотр всех документов, загруженных в систему</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-4">
+        <form method="get" class="row g-2 mb-4">
+            <div class="col-md-9">
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Поиск по названию документа">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-dark w-100">
+                    <i class="bi bi-search me-2"></i>Найти
+                </button>
+            </div>
+        </form>
+
+        {% if documents %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Владелец</th>
+                            <th>Email</th>
+                            <th>Статус</th>
+                            <th>Дата загрузки</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                            <tr>
+                                <td>{{ doc.id }}</td>
+                                <td class="fw-semibold">{{ doc.title }}</td>
+                                <td>{{ doc.owner.username }}</td>
+                                <td>{{ doc.owner.email|default:"—" }}</td>
+                                <td>
+                                    {% if doc.is_confidential %}
+                                        <span class="status-pill status-danger">Конфиденциальный</span>
+                                    {% else %}
+                                        <span class="status-pill status-success">Обычный</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ doc.uploaded_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'document_download' doc.id %}" class="btn btn-sm btn-dark">
+                                        Скачать
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="surface-box">
+                <div class="text-muted">Документы не найдены.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление аккаунта{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Удаление аккаунта</h1>
+    <p class="page-subtitle">Подтверждение удаления профиля пользователя</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-xl-7">
+        <div class="card border-danger">
+            <div class="card-body p-4">
+                <h5 class="card-title text-danger mb-3">Внимание</h5>
+
+                <p>После удаления аккаунта будут удалены:</p>
+
+                <ul>
+                    <li>учётная запись пользователя;</li>
+                    <li>загруженные документы;</li>
+                    <li>настройки безопасности и 2FA;</li>
+                    <li>история личных событий безопасности.</li>
+                </ul>
+
+                <p class="mb-4">
+                    Для начала введите <strong>текущий пароль</strong>. Если у вас включён второй фактор, система запросит дополнительное подтверждение.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Текущий пароль</label>
+                        <input type="password" name="current_password" class="form-control" placeholder="Введите текущий пароль" required>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>Продолжить удаление
+                        </button>
+                        <a href="{% url 'profile_edit' %}" class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

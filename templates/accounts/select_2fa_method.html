@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Выбор метода 2FA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="mx-auto mb-3 stat-icon icon-primary">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h2 class="fw-bold">Выбор способа подтверждения</h2>
+                    <p class="text-muted mb-0">Выберите доступный способ завершения входа</p>
+                </div>
+
+                <div class="surface-box mb-4">
+                    <div class="small text-muted">Пользователь</div>
+                    <div class="fw-semibold">{{ user_obj.username }}</div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-3">
+                        {% if is_totp_available %}
+                            <button type="submit" name="method" value="totp" class="btn btn-dark py-3 text-start">
+                                <i class="bi bi-phone me-2"></i>
+                                <strong>TOTP</strong><br>
+                                <span class="small">Код из приложения-аутентификатора</span>
+                            </button>
+                        {% endif %}
+
+                        {% if is_email_available %}
+                            <button type="submit" name="method" value="email" class="btn btn-primary py-3 text-start">
+                                <i class="bi bi-envelope-check me-2"></i>
+                                <strong>Email OTP</strong><br>
+                                <span class="small">Код будет отправлен на электронную почту</span>
+                            </button>
+                        {% endif %}
+
+                        {% if has_backup_codes %}
+                            <button type="submit" name="method" value="backup" class="btn btn-outline-secondary py-3 text-start">
+                                <i class="bi bi-key me-2"></i>
+                                <strong>Резервный код</strong><br>
+                                <span class="small">Используйте, если нет доступа к основным методам</span>
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="{% url 'login' %}" class="text-decoration-none">Вернуться ко входу</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

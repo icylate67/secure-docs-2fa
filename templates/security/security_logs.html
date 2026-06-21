@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Журнал безопасности{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Журнал безопасности</h1>
+    <p class="page-subtitle">История аутентификации, 2FA и событий защиты аккаунта</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-4">
+        {% if logs %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Дата и время</th>
+                            <th>Событие</th>
+                            <th>IP-адрес</th>
+                            <th>User-Agent</th>
+                            <th>Детали</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td>{{ log.created_at|date:"d.m.Y H:i:s" }}</td>
+                                <td class="fw-semibold">{{ log.get_event_type_display }}</td>
+                                <td>{{ log.ip_address|default:"—" }}</td>
+                                <td style="max-width: 260px; word-break: break-word;">{{ log.user_agent|default:"—" }}</td>
+                                <td>{{ log.details|default:"—" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="surface-box">
+                <div class="text-muted">Событий безопасности пока нет.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

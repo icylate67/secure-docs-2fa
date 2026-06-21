@@ -1,0 +1,38 @@
+# Секреты и конфигурация
+.env
+.env.*
+!.env.example
+
+# Виртуальные окружения
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Медиафайлы (загружаемые пользователями)
+media/
+
+# Статика (если собирается через collectstatic)
+staticfiles/
+static_root/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# заметки (md-файлы в папке documents-приложения)
+documents/*.md
+
+# Docker overrides
+docker-compose.override.yml

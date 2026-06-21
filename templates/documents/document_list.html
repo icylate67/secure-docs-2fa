@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Документы{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Документы</h1>
+    <p class="page-subtitle">Управление пользовательскими файлами и поиск по ним</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                    <h5 class="card-title mb-0">Список документов</h5>
+                    <span class="text-muted small">Всего: {{ documents|length }}</span>
+                </div>
+
+                <form method="get" class="row g-2 mb-4">
+                    <div class="col-md-9">
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Поиск по названию документа">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-outline-dark w-100">
+                            <i class="bi bi-search me-2"></i>Найти
+                        </button>
+                    </div>
+                </form>
+
+                {% if documents %}
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Описание</th>
+                                    <th>Статус</th>
+                                    <th>Дата загрузки</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documents %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ doc.title }}</td>
+                                        <td>{{ doc.description|default:"—" }}</td>
+                                        <td>
+                                            {% if doc.is_confidential %}
+                                                <span class="status-pill status-danger">
+                                                    <i class="bi bi-lock-fill"></i>Конфиденциальный
+                                                </span>
+                                            {% else %}
+                                                <span class="status-pill status-success">
+                                                    <i class="bi bi-unlock-fill"></i>Обычный
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ doc.uploaded_at|date:"d.m.Y H:i" }}</td>
+                                        <td>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <a class="btn btn-sm btn-dark" href="{% url 'document_download' doc.id %}">
+                                                    <i class="bi bi-download me-1"></i>Скачать
+                                                </a>
+                                                <a class="btn btn-sm btn-outline-danger" href="{% url 'document_delete' doc.id %}">
+                                                    <i class="bi bi-trash me-1"></i>Удалить
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="surface-box">
+                        <div class="text-muted">Документы не найдены.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-3">Загрузить документ</h5>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Название документа</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Файл</label>
+                        {{ form.file }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Описание</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="form-check mb-4">
+                        {{ form.is_confidential }}
+                        <label class="form-check-label ms-1">Конфиденциальный документ</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-upload me-2"></i>Загрузить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

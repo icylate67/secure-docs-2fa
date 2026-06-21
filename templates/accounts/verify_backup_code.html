@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Подтверждение резервным кодом{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-xl-5">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="mx-auto mb-3 stat-icon icon-warning">
+                        <i class="bi bi-key"></i>
+                    </div>
+                    <h2 class="fw-bold">Резервный код</h2>
+                    <p class="text-muted mb-0">Используйте резервный код, если основной второй фактор недоступен</p>
+                </div>
+
+                <div class="surface-box mb-4">
+                    <div class="small text-muted">Пользователь</div>
+                    <div class="fw-semibold">{{ user_obj.username }}</div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Резервный код</label>
+                        <input type="text" name="backup_code" class="form-control" placeholder="Введите резервный код" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 py-2">
+                        <i class="bi bi-check2-circle me-2"></i>Подтвердить вход
+                    </button>
+                </form>
+
+                <div class="text-center mt-4 d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{% url 'back_to_2fa_selection' %}" class="text-decoration-none">Выбрать другой способ</a>
+                    <a href="{% url 'login' %}" class="text-decoration-none">Вернуться ко входу</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

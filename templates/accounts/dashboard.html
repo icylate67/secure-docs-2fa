@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Личный кабинет</h1>
+    <p class="page-subtitle">Обзор состояния аккаунта, документов и механизмов защиты</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <div class="stat-icon icon-primary">
+                    <i class="bi bi-files"></i>
+                </div>
+                <div class="text-muted small">Всего документов</div>
+                <div class="fs-2 fw-bold">{{ documents_count }}</div>
+                <div class="text-muted mt-2">Файлы, загруженные пользователем</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <div class="stat-icon icon-danger">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+                <div class="text-muted small">Конфиденциальные</div>
+                <div class="fs-2 fw-bold">{{ confidential_count }}</div>
+                <div class="text-muted mt-2">Документы с ограниченным доступом</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <div class="stat-icon icon-success">
+                    <i class="bi bi-phone"></i>
+                </div>
+                <div class="text-muted small">TOTP</div>
+                <div class="mt-2">
+                    {% if mfa_settings.is_totp_enabled %}
+                    <span class="status-pill status-success">Включён</span>
+                    {% else %}
+                    <span class="status-pill status-danger">Отключён</span>
+                    {% endif %}
+                </div>
+                <div class="text-muted mt-3">Подтверждение через приложение</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <div class="stat-icon icon-warning">
+                    <i class="bi bi-envelope-check"></i>
+                </div>
+                <div class="text-muted small">Email OTP</div>
+                <div class="mt-2">
+                    {% if mfa_settings.is_email_enabled %}
+                    <span class="status-pill status-success">Включён</span>
+                    {% else %}
+                    <span class="status-pill status-danger">Отключён</span>
+                    {% endif %}
+                </div>
+                <div class="text-muted mt-3">Подтверждение через email</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Недавние события безопасности</h5>
+                    <a href="{% url 'security_logs' %}" class="btn btn-sm btn-outline-dark">Весь журнал</a>
+                </div>
+
+                {% if recent_logs %}
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Событие</th>
+                                <th>Детали</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.created_at|date:"d.m.Y H:i:s" }}</td>
+                                <td class="fw-semibold">{{ log.get_event_type_display }}</td>
+                                <td>{{ log.details|default:"—" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="surface-box">
+                    <div class="text-muted">Событий безопасности пока нет.</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card mb-4">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-3"><i class="bi bi-person-badge me-2"></i>Профиль</h5>
+
+                <div class="mb-2">
+                    <span class="text-muted">Пользователь:</span>
+                    <strong>{{ user.username }}</strong>
+                </div>
+
+                <div class="mb-2">
+                    <span class="text-muted">Email:</span>
+                    <strong>
+                        {% if user.email %}
+                        {{ user.email }}
+                        {% else %}
+                        Не указан
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="text-muted">Роль:</span>
+                    <strong>
+                        {% if user.profile %}
+                        {{ user.profile.get_role_display }}
+                        {% else %}
+                        Пользователь
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-3"><i class="bi bi-lightning-charge me-2"></i>Быстрые действия</h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'documents' %}" class="btn btn-dark">Открыть документы</a>
+                    <a href="{% url 'security_settings' %}" class="btn btn-primary">Настройки безопасности</a>
+                    <a href="{% url 'profile_edit' %}" class="btn btn-outline-primary">Редактировать профиль</a>
+                    <a href="{% url 'security_logs' %}" class="btn btn-outline-dark">Журнал безопасности</a>
+
+                    {% if user.is_staff or user.profile.role == 'admin' %}
+                    <a href="{% url 'admin_users' %}" class="btn btn-outline-success">Пользователи системы</a>
+                    <a href="{% url 'admin_security_logs' %}" class="btn btn-outline-danger">Общий журнал
+                        безопасности</a>
+                    <a href="{% url 'admin_documents' %}" class="btn btn-outline-dark">Документы пользователей</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

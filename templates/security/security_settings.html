@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Настройки безопасности{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Настройки безопасности</h1>
+    <p class="page-subtitle">Управление методами двухфакторной аутентификации и политикой входа</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Методы 2FA</h5>
+
+                <div class="surface-box mb-4">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                        <div>
+                            <h6 class="mb-1"><i class="bi bi-phone me-2"></i>TOTP</h6>
+                            <div class="text-muted small">Подтверждение входа через приложение-аутентификатор</div>
+                        </div>
+                        {% if mfa_settings.is_totp_enabled %}
+                            <span class="status-pill status-success">Включён</span>
+                        {% else %}
+                            <span class="status-pill status-danger">Отключён</span>
+                        {% endif %}
+                    </div>
+
+                    {% if mfa_settings.is_totp_enabled %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="disable_totp">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle me-2"></i>Отключить TOTP
+                            </button>
+                        </form>
+                    {% else %}
+                        {% if not qr_code_base64 %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="start_totp">
+                                <button type="submit" class="btn btn-dark">
+                                    <i class="bi bi-qr-code me-2"></i>Настроить TOTP
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                {% if qr_code_base64 and not mfa_settings.is_totp_enabled %}
+                    <div class="surface-box mb-4">
+                        <h6 class="mb-3">Подключение TOTP</h6>
+                        <p class="text-muted small">Отсканируйте QR-код через Google Authenticator или совместимое приложение.</p>
+
+                        <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="img-fluid mb-3" style="max-width: 250px;">
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="verify_totp">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Код из приложения</label>
+                                <input type="text" name="totp_code" class="form-control" maxlength="6" placeholder="Введите код" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check2-circle me-2"></i>Подтвердить и включить TOTP
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                <div class="surface-box mb-4">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                        <div>
+                            <h6 class="mb-1"><i class="bi bi-envelope-check me-2"></i>Email OTP</h6>
+                            <div class="text-muted small">Подтверждение входа одноразовым кодом по почте</div>
+                        </div>
+                        {% if mfa_settings.is_email_enabled %}
+                            <span class="status-pill status-success">Включён</span>
+                        {% else %}
+                            <span class="status-pill status-danger">Отключён</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="text-muted small mb-1">
+                        Привязанный адрес: <strong>{{ request.user.email|default:"не указан" }}</strong>
+                    </p>
+
+                    <p class="text-muted small mb-3">
+                        Статус email:
+                        {% if profile_obj.email_verified %}
+                            <strong>подтверждён</strong>
+                        {% else %}
+                            <strong>не подтверждён</strong>
+                        {% endif %}
+                    </p>
+
+                    {% if not profile_obj.email_verified %}
+                        <div class="alert alert-warning">
+                            Для включения Email OTP необходимо сначала подтвердить электронную почту.
+                        </div>
+                    {% endif %}
+
+                    {% if mfa_settings.is_email_enabled %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="disable_email">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Текущий пароль</label>
+                                <input type="password" name="current_password" class="form-control" placeholder="Введите текущий пароль" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle me-2"></i>Отключить Email OTP
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="enable_email">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Текущий пароль</label>
+                                <input type="password" name="current_password" class="form-control" placeholder="Введите текущий пароль" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-envelope-plus me-2"></i>Включить Email OTP
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+
+                <div class="surface-box mb-4">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                        <div>
+                            <h6 class="mb-1"><i class="bi bi-key me-2"></i>Резервные коды</h6>
+                            <div class="text-muted small">Одноразовые коды для восстановления доступа, если основной второй фактор недоступен</div>
+                        </div>
+                    </div>
+
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="generate_backup_codes">
+                        <button type="submit" class="btn btn-outline-dark">
+                            <i class="bi bi-arrow-repeat me-2"></i>Сгенерировать резервные коды
+                        </button>
+                    </form>
+
+                    {% if new_backup_codes %}
+                        <div class="alert alert-warning">
+                            <strong>Сохраните эти коды сейчас.</strong><br>
+                            После закрытия страницы они больше не будут показаны повторно.
+                        </div>
+
+                        <div class="surface-box">
+                            <ul class="mb-0">
+                                {% for code in new_backup_codes %}
+                                    <li><code>{{ code }}</code></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% elif mfa_settings.backup_codes %}
+                        <p class="text-muted mb-0">
+                            Резервные коды уже созданы и сохранены в системе в защищённом виде.
+                            Для генерации нового набора нажмите кнопку выше.
+                        </p>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            Резервные коды ещё не сгенерированы.
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'security_logs' %}" class="btn btn-outline-dark">
+                        <i class="bi bi-clock-history me-2"></i>Открыть журнал безопасности
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

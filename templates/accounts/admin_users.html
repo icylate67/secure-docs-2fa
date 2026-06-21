@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Пользователи системы</h1>
+    <p class="page-subtitle">Список зарегистрированных пользователей портала</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-4">
+        {% if users_list %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Логин</th>
+                            <th>Email</th>
+                            <th>Роль</th>
+                            <th>Статус</th>
+                            <th>Дата регистрации</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users_list %}
+                            <tr>
+                                <td>{{ u.id }}</td>
+                                <td class="fw-semibold">{{ u.username }}</td>
+                                <td>{{ u.email|default:"—" }}</td>
+                                <td>
+                                    {% if u.profile %}
+                                        {{ u.profile.get_role_display }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if u.is_staff %}
+                                        <span class="status-pill status-primary">Админ Django</span>
+                                    {% else %}
+                                        <span class="status-pill status-success">Активен</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ u.date_joined|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="surface-box">
+                <div class="text-muted">Пользователи не найдены.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

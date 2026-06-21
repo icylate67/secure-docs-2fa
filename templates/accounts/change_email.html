@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Смена email{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title">Смена электронной почты</h1>
+    <p class="page-subtitle">Новая почта будет применена только после подтверждения по ссылке</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-xl-7">
+        <div class="card">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Запрос смены email</h5>
+
+                <div class="mb-3">
+                    <span class="text-muted">Текущий email:</span>
+                    <strong>{{ current_email|default:"Не указан" }}</strong>
+                </div>
+
+                {% if pending_email %}
+                    <div class="alert alert-warning">
+                        Для адреса <strong>{{ pending_email }}</strong> уже ожидается подтверждение.
+                    </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Новый email</label>
+                        {{ form.new_email }}
+                        {% if form.new_email.errors %}
+                            <div class="text-danger small mt-2">
+                                {% for error in form.new_email.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Текущий пароль</label>
+                        {{ form.current_password }}
+                        {% if form.current_password.errors %}
+                            <div class="text-danger small mt-2">
+                                {% for error in form.current_password.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-envelope-check me-2"></i>Отправить подтверждение
+                        </button>
+                        <a href="{% url 'profile_edit' %}" class="btn btn-outline-secondary">Назад</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
